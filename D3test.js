@@ -18,7 +18,7 @@ function loadHtmlWrapper( webview )
   	html += "<script src='d3.min.js'></script>";
   	html += "<script src='D3test.js'></script>";
   	html += "<script>document.addEventListener('DOMContentLoaded', OnReady)</script>";
-  	html += "</body><div id='vis'></div></html>";
+  	html += "<div id='vis'></div></body></html>";
   	webview.LoadHtml( html );
 }
 
@@ -31,6 +31,12 @@ function OnReady( )
         .attr("width", canvasWidth)
         .attr("height", canvasHeight);
     var context = chart.node().getContext("2d");
+    
+    var el = document.getElementsByTagName("canvas")[0];
+    el.addEventListener("touchstart", handleStart, false);
+    el.addEventListener("touchend", handleEnd, false);
+    el.addEventListener("touchcancel", handleCancel, false);
+    el.addEventListener("touchmove", handleMove, false);
     
     var DATA_WIDTH = 36;
     var DATA_HEIGHT = 240;
@@ -112,7 +118,24 @@ function drawVisible(
             context.fillStyle = 'rgb('+v+','+v+','+v+')';
             context.fill();
             context.closePath();
-            console.log( r +',' + c + ',' + x + ',' + y + ',' + xSize + ',' + ySize + ',' + v );
+            //console.log( r +',' + c + ',' + x + ',' + y + ',' + xSize + ',' + ySize + ',' + v );
         }
     }
+}
+
+function handleStart()
+{
+    console.log('start');
+}
+function handleEnd()
+{
+    console.log('end');
+}
+function handleMove()
+{
+    console.log('move');
+}
+function handleCancel()
+{
+
 }

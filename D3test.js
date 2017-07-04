@@ -22,15 +22,31 @@ function loadHtmlWrapper( webview )
   	webview.LoadHtml( html );
 }
 
+var m_dataWidth = 36;
+var m_dataHeight = 240;
+var m_depthData = [];
+var m_imageData = [];
+var m_context;
+var m_topDepth;
+var m_bottomDepth;
+
+function canvasWidth()
+{
+    return window.innerWidth - 16;
+}
+
+function canvasHeight()
+{
+    return window.innerHeight - 16;
+}
+
 function OnReady( )
 {
-    var canvasWidth = window.innerWidth - 16;
-    var canvasHeight = window.innerHeight - 16;
     var base = d3.select("#vis");
     var chart = base.append("canvas")
-        .attr("width", canvasWidth)
-        .attr("height", canvasHeight);
-    var context = chart.node().getContext("2d");
+        .attr("width", canvasWidth() )
+        .attr("height", canvasHeight() );
+    m_context = chart.node().getContext("2d");
     
     var el = document.getElementsByTagName("canvas")[0];
     el.addEventListener("touchstart", handleStart, false);
@@ -38,37 +54,26 @@ function OnReady( )
     el.addEventListener("touchcancel", handleCancel, false);
     el.addEventListener("touchmove", handleMove, false);
     
-    var DATA_WIDTH = 36;
-    var DATA_HEIGHT = 240;
-    var imageData = [];
-    var depthData = [];
     var lastDepth = 100;
-    for ( var i = 0; i < DATA_HEIGHT; i++ )
+    for ( var i = 0; i < m_dataHeight; i++ )
     {
-        for ( var j = 0; j < DATA_WIDTH; j++ )
+        for ( var j = 0; j < m_dataWidth; j++ )
         {
-            imageData.push( Math.random() );
+            m_imageData.push( Math.random() );
         }
-        depthData.push( lastDepth );
+        m_depthData.push( lastDepth );
         lastDepth += 1 + Math.random();
     }
+    m_topDepth = 150;
+    m_bottomDepth = 170;
     
     console.log( 'data loaded' );
     
     drawVisible(
-        canvasWidth, canvasHeight,
-        context, imageData, depthData,
-        DATA_WIDTH, DATA_HEIGHT,
-        150, 170);
-    /*
-    data.forEach(function(d, i) {
-        context.beginPath();
-        context.rect(scale(d), 150, 10, 10);
-        context.fillStyle="red";
-        context.fill();
-        context.closePath();
-    });
-    */
+        canvasWidth(), canvasHeight(),
+        m_context, m_imageData, m_depthData,
+        m_dataWidth, m_dataHeight,
+        m_topDepth, m_bottomDepth);
 }
 
 function drawVisible(
@@ -123,6 +128,8 @@ function drawVisible(
     }
 }
 
+
+
 function handleStart()
 {
     console.log('start');
@@ -134,6 +141,11 @@ function handleEnd()
 function handleMove()
 {
     console.log('move');
+    drawVisible(
+        canvasWidth(), canvasHeight(),
+        m_context, m_imageData, m_depthData,
+        DATA_WIDTH, DATA_HEIGHT,
+        m_topDepth, m_bottomDepth);
 }
 function handleCancel()
 {

@@ -104,13 +104,22 @@ function OnReady( )
     drawVisible(
         canvasWidth(), canvasHeight(),
         m_context, 
-        m_topDepth, m_bottomDepth);
+        m_topDepth, m_bottomDepth );
+}
+
+function adjustTopBottomView( deltaY )
+{
+    var depthRange = m_bottomDepth - m_topDepth;
+    var pixelToDepth = depthRange / canvasHeight();
+    var depthOffset = pixelToDepth * deltaY;
+    m_topDepth -= depthOffset;
+    m_bottomDepth -= depthOffset;
 }
 
 function drawVisible(
     viewWidth, viewHeight,
     context,
-    startDepth, endDepth)
+    startDepth, endDepth )
 {
     var dataWidth = BHIMAGEDATA.dataWidth();
     var dataHeight = BHIMAGEDATA.dataHeight();
@@ -211,13 +220,14 @@ function handleMove()
   
     var idx = ongoingTouchIndexById( touches[ 0 ].identifier );
     var deltaY = Math.floor( touches[ 0 ].pageY - m_ongoingTouches[ idx ].pageY );
+    m_ongoingTouches[ idx ].pageY = touches[ 0 ].pageY;
     
-    console.log( deltaY );
+    adjustTopBottomView( deltaY );
         
     drawVisible(
         canvasWidth(), canvasHeight(),
         m_context, 
-        m_topDepth, m_bottomDepth);
+        m_topDepth, m_bottomDepth );
 }
 function handleCancel( event )
 {

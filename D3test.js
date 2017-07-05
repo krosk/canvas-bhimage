@@ -119,31 +119,19 @@ function adjustTopBottomView( deltaY0, deltaY1, diff01 )
     m_bottomDepth -= diff01 > 0 ? depthOffset1 : depthOffset0;
 }
 
-function fillRect( context, x, y, xSize, ySize, r, g, b )
+function fillRect( pixelData, width, x, y, xSize, ySize, r, g, b )
 {
-    var imageData = context.getImageData(x, y, xSize, ySize);
-    var pixelData = imageData.data;
-    for ( var i = 0; i < pixelData.length; i += 4 )
-    {
-        pixelData[ i ] = r;
-        pixelData[ i + 1 ] = g;
-        pixelData[ i + 2 ] = b;
-        pixelData[ i + 3 ] = 255;
-    }
-    context.putImageData( imageData, x, y );
-    /*
     for ( var i = y; i < y + ySize; i++ )
     {
         for ( var j = x; j < x + xSize; j++ )
         {
-            var idx = (i * cols + j) * 4;
+            var idx = ( i * width + j ) * 4;
             pixelData[ idx ] = r;
             pixelData[ idx + 1 ] = g;
             pixelData[ idx + 2 ] = b;
             pixelData[ idx + 3 ] = 255;
         }
     }
-    */
 }
 
 function drawVisible(
@@ -169,8 +157,8 @@ function drawVisible(
         .interpolate(d3.interpolateRound)
         .domain([0, 1]);
         
-    //var imageData = context.getImageData( 0, 0, viewWidth, viewHeight );
-    //var pixelData = imageData.data;
+    var imageData = context.getImageData( 0, 0, viewWidth, viewHeight );
+    var pixelData = imageData.data;
         
     for ( var r = 0; r < dataHeight; r++ )
     {
@@ -189,18 +177,15 @@ function drawVisible(
         
         for ( var c = 0; c < dataWidth; c++ )
         {
-            //context.beginPath();
             var x = azimuthScale( c );
             var xSize = azimuthScale( c + 1 ) - x;
-            //context.rect(x, y, xSize, ySize);
             var v = grayScale( BHIMAGEDATA.imageValue( r, c ) );
-            fillRect( context, x, y, xSize, ySize, v, v, v );
-            //context.fillStyle = 'rgb('+v+','+v+','+v+')';
-            //context.fill();
-            //context.closePath();
+            fillRect( pixelData, viewWidth, x, y, xSize, ySize, v, v, v );
             //console.log( r +',' + c + ',' + x + ',' + y + ',' + xSize + ',' + ySize + ',' + v );
         }
     }
+    
+    context.putImageData( imageData, 0, 0 );
 }
 
 var m_ongoingTouches = [];

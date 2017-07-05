@@ -147,7 +147,6 @@ function drawVisible(
         
         for ( var c = 0; c < dataWidth; c++ )
         {
-            var index = r*dataWidth + c;
             context.beginPath();
             var x = azimuthScale( c );
             var xSize = azimuthScale( c + 1 ) - x;
@@ -161,22 +160,74 @@ function drawVisible(
     }
 }
 
+var m_ongoingTouches = [];
 
-
-function handleStart()
+function copyTouch( touch )
 {
-    console.log('start');
+    return { identifier: touch.identifier, pageX: touch.pageX, pageY: touch.pageY };
+}
+
+function ongoingTouchIndexById( idToFind )
+{
+    for (var i = 0; i < m_ongoingTouches.length; i++)
+    {
+        var id = m_ongoingTouches[ i ].identifier;
+    
+        if ( id == idToFind ) {
+            return i;
+        }
+    }
+    return -1;    // not found
+}
+
+function handleStart( event )
+{
+    event.preventDefault();
+    console.log("touchstart.");
+    var touches = event.changedTouches;
+        
+    for ( var i = 0; i < touches.length; i++)
+    {
+        m_ongoingTouches.push( copyTouch( touches[ i ] ) );
+    }
 }
 function handleEnd()
 {
-    console.log('end');
+    event.preventDefault();
+    console.log( "touchend." );
+    var touches = event.changedTouches;
+  
+    for (var i = 0; i < touches.length; i++)
+    {
+        var idx = ongoingTouchIndexById( touches[ i ].identifier );
+        m_ongoingTouches.splice( idx, 1 );  // remove it; we're done
+    }
 }
 function handleMove()
 {
-    console.log('move');
+    event.preventDefault();
+    console.log("touchmove.");
+    var touches = event.changedTouches;
+  
+    var idx = ongoingTouchIndexById( touches[ 0 ].identifier );
+    var deltaY = Math.floor( touches[ 0 ].pageY - m_ongoingTouches[ idx ].pageY );
     
+    console.log( deltaY );
+        
+    drawVisible(
+        canvasWidth(), canvasHeight(),
+        m_context, 
+        m_topDepth, m_bottomDepth);
 }
-function handleCancel()
+function handleCancel( event )
 {
-
+    event.preventDefault();
+    console.log("touchcancel.");
+    var touches = event.changedTouches;
+  
+    for (var i = 0; i < touches.length; i++)
+    {
+        var idx = ongoingTouchIndexById( touches[ i ].identifier );
+        m_ongoingTouches.splice( idx, 1 );  // remove it; we're done
+    }
 }

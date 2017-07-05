@@ -27,7 +27,7 @@ var BHIMAGEDATA = (function()
 {
     var public = {};
     var m_dataWidth = 36;
-    var m_dataHeight = 240;
+    var m_dataHeight = 1000;
     var m_depthData = [];
     var m_imageData = [];
     
@@ -95,7 +95,7 @@ function OnReady( )
     el.addEventListener("touchmove", handleMove, false);
     
     m_topDepth = 150;
-    m_bottomDepth = 170;
+    m_bottomDepth = 350;
     
     BHIMAGEDATA.initialize();
     
@@ -105,6 +105,8 @@ function OnReady( )
         canvasWidth(), canvasHeight(),
         m_context, 
         m_topDepth, m_bottomDepth );
+        
+    console.log( 'data finish drawing' );
 }
 
 function adjustTopBottomView( deltaY0, deltaY1, diff01 )
@@ -115,6 +117,33 @@ function adjustTopBottomView( deltaY0, deltaY1, diff01 )
     var depthOffset1 = pixelToDepth * deltaY1;
     m_topDepth -= diff01 > 0 ? depthOffset0 : depthOffset1;
     m_bottomDepth -= diff01 > 0 ? depthOffset1 : depthOffset0;
+}
+
+function fillRect( context, x, y, xSize, ySize, r, g, b )
+{
+    var imageData = context.getImageData(x, y, xSize, ySize);
+    var pixelData = imageData.data;
+    for ( var i = 0; i < pixelData.length; i += 4 )
+    {
+        pixelData[ i ] = r;
+        pixelData[ i + 1 ] = g;
+        pixelData[ i + 2 ] = b;
+        pixelData[ i + 3 ] = 255;
+    }
+    context.putImageData( imageData, x, y );
+    /*
+    for ( var i = y; i < y + ySize; i++ )
+    {
+        for ( var j = x; j < x + xSize; j++ )
+        {
+            var idx = (i * cols + j) * 4;
+            pixelData[ idx ] = r;
+            pixelData[ idx + 1 ] = g;
+            pixelData[ idx + 2 ] = b;
+            pixelData[ idx + 3 ] = 255;
+        }
+    }
+    */
 }
 
 function drawVisible(
@@ -140,6 +169,9 @@ function drawVisible(
         .interpolate(d3.interpolateRound)
         .domain([0, 1]);
         
+    //var imageData = context.getImageData( 0, 0, viewWidth, viewHeight );
+    //var pixelData = imageData.data;
+        
     for ( var r = 0; r < dataHeight; r++ )
     {
         var depth = BHIMAGEDATA.depthValue( r );
@@ -157,14 +189,15 @@ function drawVisible(
         
         for ( var c = 0; c < dataWidth; c++ )
         {
-            context.beginPath();
+            //context.beginPath();
             var x = azimuthScale( c );
             var xSize = azimuthScale( c + 1 ) - x;
-            context.rect(x, y, xSize, ySize);
+            //context.rect(x, y, xSize, ySize);
             var v = grayScale( BHIMAGEDATA.imageValue( r, c ) );
-            context.fillStyle = 'rgb('+v+','+v+','+v+')';
-            context.fill();
-            context.closePath();
+            fillRect( context, x, y, xSize, ySize, v, v, v );
+            //context.fillStyle = 'rgb('+v+','+v+','+v+')';
+            //context.fill();
+            //context.closePath();
             //console.log( r +',' + c + ',' + x + ',' + y + ',' + xSize + ',' + ySize + ',' + v );
         }
     }

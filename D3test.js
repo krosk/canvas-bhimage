@@ -107,13 +107,14 @@ function OnReady( )
         m_topDepth, m_bottomDepth );
 }
 
-function adjustTopBottomView( deltaY )
+function adjustTopBottomView( deltaY0, deltaY1, diff01 )
 {
     var depthRange = m_bottomDepth - m_topDepth;
     var pixelToDepth = depthRange / canvasHeight();
-    var depthOffset = pixelToDepth * deltaY;
-    m_topDepth -= depthOffset;
-    m_bottomDepth -= depthOffset;
+    var depthOffset0 = pixelToDepth * deltaY0;
+    var depthOffset1 = pixelToDepth * deltaY1;
+    m_topDepth -= diff01 > 0 ? depthOffset0 : depthOffset1;
+    m_bottomDepth -= diff01 > 0 ? depthOffset1 : depthOffset0;
 }
 
 function drawVisible(
@@ -218,11 +219,21 @@ function handleMove()
     console.log("touchmove.");
     var touches = event.changedTouches;
   
-    var idx = ongoingTouchIndexById( touches[ 0 ].identifier );
-    var deltaY = Math.floor( touches[ 0 ].pageY - m_ongoingTouches[ idx ].pageY );
-    m_ongoingTouches[ idx ].pageY = touches[ 0 ].pageY;
+    var idx0 = ongoingTouchIndexById( touches[ 0 ].identifier );
+    var deltaY0 = Math.floor( touches[ 0 ].pageY - m_ongoingTouches[ idx0 ].pageY );
+    m_ongoingTouches[ idx0 ].pageY = touches[ 0 ].pageY;
     
-    adjustTopBottomView( deltaY );
+    var diff01 = 0;
+    var deltaY1 = deltaY0;
+    if ( touches.length > 1 )
+    {
+        var idx1 = ongoingTouchIndexById( touches[ 1 ].identifier );
+        deltaY1 = Math.floor( touches[ 1 ].pageY - m_ongoingTouches[ idx1 ].pageY );
+        m_ongoingTouches[ idx1 ].pageY = touches[ 1 ].pageY;
+        diff01 = touches[ 1 ].pageY - touches[ 0 ].pageY;
+    }
+    
+    adjustTopBottomView( deltaY0, deltaY1, diff01 );
         
     drawVisible(
         canvasWidth(), canvasHeight(),

@@ -104,7 +104,7 @@ function OnReady( )
     drawVisible(
         canvasWidth(), canvasHeight(),
         m_context, 
-        m_topDepth, m_bottomDepth );
+        m_topDepth, m_bottomDepth, false );
         
     console.log( 'data finish drawing' );
 }
@@ -134,10 +134,14 @@ function fillRect( pixelData, width, x, y, xSize, ySize, r, g, b )
     }
 }
 
+var m_topDepthRendered = m_topDepth;
+var m_bottomDepthRendered = m_bottomDepth;
+
 function drawVisible(
     viewWidth, viewHeight,
     context,
-    startDepth, endDepth )
+    startDepth, endDepth,
+    transformFlag )
 {
     var dataWidth = BHIMAGEDATA.dataWidth();
     var dataHeight = BHIMAGEDATA.dataHeight();
@@ -157,10 +161,26 @@ function drawVisible(
         .interpolate(d3.interpolateRound)
         .domain([0, 1]);
         
+    var newRange = endDepth - startDepth;
+    var oldRange = m_bottomDepthRendered - m_topDepthRendered;
+    var ratio = oldRange / newRange;
+    
+    var startRow = 0;
+    var endRow = dataHeight;
+    
+    if ( transformFlag )
+    {
+        //console.log( ratio );
+        //context.setTransform( 1, 0, 0, ratio, 0, 0 );
+        m_topDepthRendered = startDepth;
+        m_bottomDepthRendered = endDepth;
+        //return;
+    }
+    
     var imageData = context.getImageData( 0, 0, viewWidth, viewHeight );
     var pixelData = imageData.data;
         
-    for ( var r = 0; r < dataHeight; r++ )
+    for ( var r = startRow; r < endRow; r++ )
     {
         var depth = BHIMAGEDATA.depthValue( r );
         var depthNext = BHIMAGEDATA.depthValue( r + 1 );
@@ -256,7 +276,7 @@ function handleMove()
     drawVisible(
         canvasWidth(), canvasHeight(),
         m_context, 
-        m_topDepth, m_bottomDepth );
+        m_topDepth, m_bottomDepth, true );
 }
 function handleCancel( event )
 {

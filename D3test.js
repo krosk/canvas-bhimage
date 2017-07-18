@@ -124,15 +124,15 @@ function adjustTopBottomView( deltaY0, deltaY1, diff01 )
 
 function fillRect( pixelData, width, x, y, xSize, ySize, r, g, b )
 {
+    var value = (255   << 24) |    // alpha
+            (b << 16) |    // blue
+            (g <<  8) |    // green
+             r;            // red
     for ( var i = y; i < y + ySize; i++ )
     {
         for ( var j = x; j < x + xSize; j++ )
         {
-            var idx = ( i * width + j ) * 4;
-            pixelData[ idx ] = r;
-            pixelData[ idx + 1 ] = g;
-            pixelData[ idx + 2 ] = b;
-            pixelData[ idx + 3 ] = 255;
+            pixelData[ i * width + j ] = value;
         }
     }
 }
@@ -181,7 +181,7 @@ function drawVisible(
     }
     
     var imageData = context.getImageData( 0, 0, viewWidth, viewHeight );
-    var pixelData = imageData.data;
+    var pixelData = new Uint32Array(imageData.data.buffer);
         
     for ( var r = startRow; r < endRow; r++ )
     {
@@ -202,7 +202,7 @@ function drawVisible(
         {
             var x = azimuthScale( c );
             var xSize = azimuthScale( c + 1 ) - x;
-            var v = grayScale( BHIMAGEDATA.imageValue( r, c ) );
+            var v = grayScale( BHIMAGEDATA.imageValue( r, c ) ) & 0xff;
             fillRect( pixelData, viewWidth, x, y, xSize, ySize, v, v, v );
             //console.log( r +',' + c + ',' + x + ',' + y + ',' + xSize + ',' + ySize + ',' + v );
         }

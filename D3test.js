@@ -307,7 +307,7 @@ function handleMouseDown( event )
 }
 function handleMouseMove( event )
 {
-    if (m_ongoingMouse.length === 0)
+    if (m_ongoingMouse.pageY == null)
     {
         return;
     }

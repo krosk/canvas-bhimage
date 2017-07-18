@@ -109,7 +109,7 @@ function OnReady( )
         m_context, 
         m_topDepth, m_bottomDepth, false );
         
-    console.log( 'data finish drawing' );
+    console.log( 'data finish drawing in ' + canvasWidth() + 'x' + canvasHeight() );
 }
 
 function adjustTopBottomView( deltaY0, deltaY1, diff01 )

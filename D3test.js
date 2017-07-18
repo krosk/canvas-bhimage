@@ -95,6 +95,7 @@ function OnReady( )
     el.addEventListener("touchmove", handleTouchMove, false);
     el.addEventListener("mousedown", handleMouseDown, false);
     el.addEventListener("mouseup", handleMouseUp, false);
+    el.addEventListener("mousemove", handleMouseMove, false);
     
     m_topDepth = 150;
     m_bottomDepth = 350;

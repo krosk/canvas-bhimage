@@ -307,6 +307,11 @@ function handleMouseDown( event )
 }
 function handleMouseMove( event )
 {
+    if (m_ongoingMouse.length === 0)
+    {
+        return;
+    }
+    console.log("mousemove.");
     var newMouse = copyMouse( event );
     var deltaY0 = Math.floor( newMouse.pageY - m_ongoingMouse.pageY );
     
@@ -319,6 +324,8 @@ function handleMouseMove( event )
         canvasWidth(), canvasHeight(),
         m_context, 
         m_topDepth, m_bottomDepth, true );
+    
+    m_ongoingMouse = newMouse;
 }
 function handleMouseUp( event )
 {

@@ -89,10 +89,12 @@ function OnReady( )
     m_context = chart.node().getContext("2d");
     
     var el = document.getElementsByTagName("canvas")[0];
-    el.addEventListener("touchstart", handleStart, false);
-    el.addEventListener("touchend", handleEnd, false);
-    el.addEventListener("touchcancel", handleCancel, false);
-    el.addEventListener("touchmove", handleMove, false);
+    el.addEventListener("touchstart", handleTouchStart, false);
+    el.addEventListener("touchend", handleTouchEnd, false);
+    el.addEventListener("touchcancel", handleTouchCancel, false);
+    el.addEventListener("touchmove", handleTouchMove, false);
+    el.addEventListener("mousedown", handleMouseDown, false);
+    el.addEventListener("mouseup", handleMouseUp, false);
     
     m_topDepth = 150;
     m_bottomDepth = 350;
@@ -209,10 +211,16 @@ function drawVisible(
 }
 
 var m_ongoingTouches = [];
+var m_ongoingMouse = {};
 
 function copyTouch( touch )
 {
     return { identifier: touch.identifier, pageX: touch.pageX, pageY: touch.pageY };
+}
+
+function copyMouse( mouse )
+{
+    return { pageX: mouse.clientX, pageY: mouse.clientY };
 }
 
 function ongoingTouchIndexById( idToFind )
@@ -228,7 +236,7 @@ function ongoingTouchIndexById( idToFind )
     return -1;    // not found
 }
 
-function handleStart( event )
+function handleTouchStart( event )
 {
     event.preventDefault();
     console.log("touchstart.");
@@ -239,7 +247,7 @@ function handleStart( event )
         m_ongoingTouches.push( copyTouch( touches[ i ] ) );
     }
 }
-function handleEnd()
+function handleTouchEnd()
 {
     event.preventDefault();
     console.log( "touchend." );
@@ -251,7 +259,7 @@ function handleEnd()
         m_ongoingTouches.splice( idx, 1 );  // remove it; we're done
     }
 }
-function handleMove()
+function handleTouchMove()
 {
     event.preventDefault();
     console.log("touchmove.");
@@ -278,7 +286,7 @@ function handleMove()
         m_context, 
         m_topDepth, m_bottomDepth, true );
 }
-function handleCancel( event )
+function handleTouchCancel( event )
 {
     event.preventDefault();
     console.log("touchcancel.");
@@ -289,4 +297,30 @@ function handleCancel( event )
         var idx = ongoingTouchIndexById( touches[ i ].identifier );
         m_ongoingTouches.splice( idx, 1 );  // remove it; we're done
     }
+}
+
+function handleMouseDown( event )
+{
+    console.log("mousedown.");
+    m_ongoingMouse = copyMouse( event );
+}
+function handleMouseMove( event )
+{
+    var newMouse = copyMouse( event );
+    var deltaY0 = Math.floor( newMouse.pageY - m_ongoingMouse.pageY );
+    
+    var diff01 = 0;
+    var deltaY1 = deltaY0;
+    
+    adjustTopBottomView( deltaY0, deltaY1, diff01 );
+        
+    drawVisible(
+        canvasWidth(), canvasHeight(),
+        m_context, 
+        m_topDepth, m_bottomDepth, true );
+}
+function handleMouseUp( event )
+{
+    console.log("mouseup.");
+    m_ongoingMouse = {};
 }

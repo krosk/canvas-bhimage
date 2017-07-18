@@ -126,10 +126,7 @@ function fillRect( pixelData, width, x, y, xSize, ySize, v )
 {
     for ( var i = y; i < y + ySize; i++ )
     {
-        for ( var j = x; j < x + xSize; j++ )
-        {
-            pixelData[ i * width + j ] = v;
-        }
+        pixelData.fill( v, i * width + x, i * width + x + xSize);
     }
 }
 

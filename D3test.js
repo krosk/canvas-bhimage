@@ -122,23 +122,16 @@ function adjustTopBottomView( deltaY0, deltaY1, diff01 )
     m_bottomDepth -= diff01 > 0 ? depthOffset1 : depthOffset0;
 }
 
-function fillRect( pixelData, width, x, y, xSize, ySize, r, g, b )
+function fillRect( pixelData, width, x, y, xSize, ySize, v )
 {
-    var value = (255   << 24) |    // alpha
-            (b << 16) |    // blue
-            (g <<  8) |    // green
-             r;            // red
     for ( var i = y; i < y + ySize; i++ )
     {
         for ( var j = x; j < x + xSize; j++ )
         {
-            pixelData[ i * width + j ] = value;
+            pixelData[ i * width + j ] = v;
         }
     }
 }
-
-var m_topDepthRendered = m_topDepth;
-var m_bottomDepthRendered = m_bottomDepth;
 
 function drawVisible(
     viewWidth, viewHeight,
@@ -163,22 +156,9 @@ function drawVisible(
         .range([0, 255])
         .interpolate(d3.interpolateRound)
         .domain([0, 1]);
-        
-    var newRange = endDepth - startDepth;
-    var oldRange = m_bottomDepthRendered - m_topDepthRendered;
-    var ratio = oldRange / newRange;
     
     var startRow = 0;
     var endRow = dataHeight;
-    
-    if ( transformFlag )
-    {
-        //console.log( ratio );
-        //context.setTransform( 1, 0, 0, ratio, 0, 0 );
-        m_topDepthRendered = startDepth;
-        m_bottomDepthRendered = endDepth;
-        //return;
-    }
     
     var imageData = context.getImageData( 0, 0, viewWidth, viewHeight );
     var pixelData = new Uint32Array(imageData.data.buffer);
@@ -203,7 +183,11 @@ function drawVisible(
             var x = azimuthScale( c );
             var xSize = azimuthScale( c + 1 ) - x;
             var v = grayScale( BHIMAGEDATA.imageValue( r, c ) ) & 0xff;
-            fillRect( pixelData, viewWidth, x, y, xSize, ySize, v, v, v );
+            var value = (255   << 24) |    // alpha
+                (v << 16) |    // blue
+                (v <<  8) |    // green
+                 v;            // red
+            fillRect( pixelData, viewWidth, x, y, xSize, ySize, value );
             //console.log( r +',' + c + ',' + x + ',' + y + ',' + xSize + ',' + ySize + ',' + v );
         }
     }
@@ -323,7 +307,7 @@ function handleMouseMove( event )
     drawVisible(
         canvasWidth(), canvasHeight(),
         m_context, 
-        m_topDepth, m_bottomDepth, true );
+        m_topDepth, m_bottomDepth);
     
     m_ongoingMouse = newMouse;
 }
